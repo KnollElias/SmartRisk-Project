@@ -1,0 +1,80 @@
+{
+    "age": 21,
+    "initial_risk": 1,
+    "balance": 500.0,
+    "real_balance": 0.0,
+    "current_node": 1,
+    "last_node": 0,
+    "nodes": [
+        {
+            "index": 1,
+            "current_risk": 1,
+            "state": 4,
+            "scale": [
+                1,
+                2,
+                4,
+                8,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "index": 2,
+            "current_risk": 1,
+            "state": 4,
+            "scale": [
+                1,
+                2,
+                4,
+                8,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "index": 3,
+            "current_risk": 1,
+            "state": 3,
+            "scale": [
+                1,
+                2,
+                4,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "index": 4,
+            "current_risk": 1,
+            "state": 2,
+            "scale": [
+                1,
+                2,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        },
+        {
+            "index": 5,
+            "current_risk": 1,
+            "state": 4,
+            "scale": [
+                1,
+                2,
+                4,
+                8,
+                0,
+                0,
+                0
+            ]
+        }
+    ]
+}
