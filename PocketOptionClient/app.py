@@ -45,9 +45,9 @@ def backtest(age):
     return trade_outcome("/home/main/Documents/GitHub/MEM-Trading/V1-client/testing/goldprice/2024/dataset_2024.csv", age+1)
 
 def iteration():
-    # lastoutcome = read_outcome() # bool
+    lastoutcome = read_outcome() # bool
     statefile = read_statefile() # json
-    lastoutcome = False # backtest(statefile["age"])
+    # lastoutcome = False # backtest(statefile["age"])
 
     initialrisk = statefile["initial_risk"]
     currentnode = statefile["current_node"]
