@@ -1,10 +1,10 @@
 {
-    "age": 0,
+    "age": 6,
     "initial_risk": 1,
-    "balance": 510.0,
+    "balance": 103.0,
     "real_balance": 0.0,
     "current_node": 0,
-    "last_node": -1,
+    "last_node": 2,
     "nodes": [
         {
             "index": 1,
@@ -36,34 +36,6 @@
         },
         {
             "index": 3,
-            "current_risk": 1,
-            "state": 0,
-            "scale": [
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
-            ]
-        },
-        {
-            "index": 4,
-            "current_risk": 1,
-            "state": 0,
-            "scale": [
-                0,
-                0,
-                0,
-                0,
-                0,
-                0,
-                0
-            ]
-        },
-        {
-            "index": 5,
             "current_risk": 1,
             "state": 0,
             "scale": [

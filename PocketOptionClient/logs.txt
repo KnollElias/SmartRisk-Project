@@ -1,0 +1,18 @@
+Sucessfully read statefile at age: 0, False
+Lost last trade. 2
+Sucessfully updated the statfile at age: 0
+Sucessfully read statefile at age: 1, False
+Lost last trade. 3
+Sucessfully updated the statfile at age: 1
+Sucessfully read statefile at age: 2, False
+Lost last trade. 4
+Sucessfully updated the statfile at age: 2
+Sucessfully read statefile at age: 3, True
+Won last trade. 5
+Sucessfully updated the statfile at age: 3
+Sucessfully read statefile at age: 4, True
+Won last trade. 6
+Sucessfully updated the statfile at age: 4
+Sucessfully read statefile at age: 5, True
+Won last trade. 7
+Sucessfully updated the statfile at age: 5
