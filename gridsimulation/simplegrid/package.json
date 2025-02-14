@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "babel-runtime": "^6.26.0",
+    "ccxt": "^4.4.58",
     "chalk": "^5.4.1",
     "dotenv": "^16.4.7"
   }
