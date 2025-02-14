@@ -1,0 +1,402 @@
+{
+  "99.00": {
+    "type": "buy",
+    "executed": false
+  },
+  "98.01": {
+    "type": "buy",
+    "executed": false
+  },
+  "97.03": {
+    "type": "buy",
+    "executed": false
+  },
+  "96.06": {
+    "type": "buy",
+    "executed": false
+  },
+  "95.10": {
+    "type": "buy",
+    "executed": false
+  },
+  "94.15": {
+    "type": "buy",
+    "executed": false
+  },
+  "93.21": {
+    "type": "buy",
+    "executed": false
+  },
+  "92.27": {
+    "type": "buy",
+    "executed": false
+  },
+  "91.35": {
+    "type": "buy",
+    "executed": false
+  },
+  "90.44": {
+    "type": "buy",
+    "executed": false
+  },
+  "89.53": {
+    "type": "buy",
+    "executed": false
+  },
+  "88.64": {
+    "type": "buy",
+    "executed": false
+  },
+  "87.75": {
+    "type": "buy",
+    "executed": false
+  },
+  "86.87": {
+    "type": "buy",
+    "executed": false
+  },
+  "86.01": {
+    "type": "buy",
+    "executed": false
+  },
+  "85.15": {
+    "type": "buy",
+    "executed": false
+  },
+  "84.29": {
+    "type": "buy",
+    "executed": false
+  },
+  "83.45": {
+    "type": "buy",
+    "executed": false
+  },
+  "82.62": {
+    "type": "buy",
+    "executed": false
+  },
+  "81.79": {
+    "type": "buy",
+    "executed": false
+  },
+  "80.97": {
+    "type": "buy",
+    "executed": false
+  },
+  "80.16": {
+    "type": "buy",
+    "executed": false
+  },
+  "79.36": {
+    "type": "buy",
+    "executed": false
+  },
+  "78.57": {
+    "type": "buy",
+    "executed": false
+  },
+  "77.78": {
+    "type": "buy",
+    "executed": false
+  },
+  "77.00": {
+    "type": "buy",
+    "executed": false
+  },
+  "76.23": {
+    "type": "buy",
+    "executed": false
+  },
+  "75.47": {
+    "type": "buy",
+    "executed": false
+  },
+  "74.72": {
+    "type": "buy",
+    "executed": false
+  },
+  "73.97": {
+    "type": "buy",
+    "executed": false
+  },
+  "73.23": {
+    "type": "buy",
+    "executed": false
+  },
+  "72.50": {
+    "type": "buy",
+    "executed": false
+  },
+  "71.77": {
+    "type": "buy",
+    "executed": false
+  },
+  "71.06": {
+    "type": "buy",
+    "executed": false
+  },
+  "70.34": {
+    "type": "buy",
+    "executed": false
+  },
+  "69.64": {
+    "type": "buy",
+    "executed": false
+  },
+  "68.94": {
+    "type": "buy",
+    "executed": false
+  },
+  "68.26": {
+    "type": "buy",
+    "executed": false
+  },
+  "67.57": {
+    "type": "buy",
+    "executed": false
+  },
+  "66.90": {
+    "type": "buy",
+    "executed": false
+  },
+  "66.23": {
+    "type": "buy",
+    "executed": false
+  },
+  "65.57": {
+    "type": "buy",
+    "executed": false
+  },
+  "64.91": {
+    "type": "buy",
+    "executed": false
+  },
+  "64.26": {
+    "type": "buy",
+    "executed": false
+  },
+  "63.62": {
+    "type": "buy",
+    "executed": false
+  },
+  "62.98": {
+    "type": "buy",
+    "executed": false
+  },
+  "62.35": {
+    "type": "buy",
+    "executed": false
+  },
+  "61.73": {
+    "type": "buy",
+    "executed": false
+  },
+  "61.11": {
+    "type": "buy",
+    "executed": false
+  },
+  "60.50": {
+    "type": "buy",
+    "executed": false
+  },
+  "59.90": {
+    "type": "buy",
+    "executed": false
+  },
+  "59.30": {
+    "type": "buy",
+    "executed": false
+  },
+  "58.70": {
+    "type": "buy",
+    "executed": false
+  },
+  "58.12": {
+    "type": "buy",
+    "executed": false
+  },
+  "57.54": {
+    "type": "buy",
+    "executed": false
+  },
+  "56.96": {
+    "type": "buy",
+    "executed": false
+  },
+  "56.39": {
+    "type": "buy",
+    "executed": false
+  },
+  "55.83": {
+    "type": "buy",
+    "executed": false
+  },
+  "55.27": {
+    "type": "buy",
+    "executed": false
+  },
+  "54.72": {
+    "type": "buy",
+    "executed": false
+  },
+  "54.17": {
+    "type": "buy",
+    "executed": false
+  },
+  "53.63": {
+    "type": "buy",
+    "executed": false
+  },
+  "53.09": {
+    "type": "buy",
+    "executed": false
+  },
+  "52.56": {
+    "type": "buy",
+    "executed": false
+  },
+  "52.03": {
+    "type": "buy",
+    "executed": false
+  },
+  "51.51": {
+    "type": "buy",
+    "executed": false
+  },
+  "51.00": {
+    "type": "buy",
+    "executed": false
+  },
+  "50.49": {
+    "type": "buy",
+    "executed": false
+  },
+  "49.98": {
+    "type": "buy",
+    "executed": false
+  },
+  "49.48": {
+    "type": "buy",
+    "executed": false
+  },
+  "48.99": {
+    "type": "buy",
+    "executed": false
+  },
+  "48.50": {
+    "type": "buy",
+    "executed": false
+  },
+  "48.01": {
+    "type": "buy",
+    "executed": false
+  },
+  "47.53": {
+    "type": "buy",
+    "executed": false
+  },
+  "47.06": {
+    "type": "buy",
+    "executed": false
+  },
+  "46.59": {
+    "type": "buy",
+    "executed": false
+  },
+  "46.12": {
+    "type": "buy",
+    "executed": false
+  },
+  "45.66": {
+    "type": "buy",
+    "executed": false
+  },
+  "45.20": {
+    "type": "buy",
+    "executed": false
+  },
+  "44.75": {
+    "type": "buy",
+    "executed": false
+  },
+  "44.30": {
+    "type": "buy",
+    "executed": false
+  },
+  "43.86": {
+    "type": "buy",
+    "executed": false
+  },
+  "43.42": {
+    "type": "buy",
+    "executed": false
+  },
+  "42.99": {
+    "type": "buy",
+    "executed": false
+  },
+  "42.56": {
+    "type": "buy",
+    "executed": false
+  },
+  "42.13": {
+    "type": "buy",
+    "executed": false
+  },
+  "41.71": {
+    "type": "buy",
+    "executed": false
+  },
+  "41.29": {
+    "type": "buy",
+    "executed": false
+  },
+  "40.88": {
+    "type": "buy",
+    "executed": false
+  },
+  "40.47": {
+    "type": "buy",
+    "executed": false
+  },
+  "40.07": {
+    "type": "buy",
+    "executed": false
+  },
+  "39.67": {
+    "type": "buy",
+    "executed": false
+  },
+  "39.27": {
+    "type": "buy",
+    "executed": false
+  },
+  "38.88": {
+    "type": "buy",
+    "executed": false
+  },
+  "38.49": {
+    "type": "buy",
+    "executed": false
+  },
+  "38.10": {
+    "type": "buy",
+    "executed": false
+  },
+  "37.72": {
+    "type": "buy",
+    "executed": false
+  },
+  "37.35": {
+    "type": "buy",
+    "executed": false
+  },
+  "36.97": {
+    "type": "buy",
+    "executed": false
+  },
+  "36.60": {
+    "type": "buy",
+    "executed": false
+  }
+}

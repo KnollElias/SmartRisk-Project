@@ -1,4 +1,3 @@
-const ccxt = require("ccxt");
 const fs = require("fs");
 const readline = require("readline");
 
@@ -7,23 +6,24 @@ class GridBacktester {
     this.gridSize = gridSizePercent / 100;
     this.tradeSize = tradeSize;
     this.priceData = priceData;
-    this.balance = 100; // Simulated starting balance
-    this.profit = 0; // Track profit separately
-    this.position = 0; // Open positions
-    this.orders = new Map();
+    this.balance = 100; // Starting balance
+    this.profit = 0;
+    this.position = 0;
+    this.orders = {}; // Order book (buy/sell)
     this.initOrders(startPrice);
   }
 
-  // Initialize grid levels below the starting price
+  // Initialize buy orders below the starting price
   initOrders(startPrice) {
     let price = startPrice;
-    while (price > 0) {
+    const maxLevels = 100;
+    for (let i = 0; i < maxLevels; i++) {
       price *= 1 - this.gridSize;
-      this.orders.set(price.toFixed(2), { type: "buy", executed: false });
+      this.orders[price.toFixed(2)] = { type: "buy", executed: false };
     }
   }
 
-  // Run backtest over the price data
+  // Run the backtest over historical price data
   runBacktest() {
     for (let price of this.priceData) {
       this.processOrders(price);
@@ -33,41 +33,42 @@ class GridBacktester {
 
   // Process buy and sell orders
   processOrders(price) {
-    this.orders.forEach((order, level) => {
+    Object.keys(this.orders).forEach(level => {
       level = parseFloat(level);
-      if (order.type === "buy" && price <= level && !order.executed) {
+      if (this.orders[level] && this.orders[level].type === "buy" && price <= level && !this.orders[level].executed) {
         this.executeBuy(level);
-      } else if (order.type === "sell" && price >= level && !order.executed) {
+      } else if (this.orders[level] && this.orders[level].type === "sell" && price >= level && !this.orders[level].executed) {
         this.executeSell(level);
       }
     });
   }
 
   executeBuy(price) {
-    this.position += this.tradeSize;
-    this.balance -= price * this.tradeSize;
-    console.log(`BUY at ${price.toFixed(2)} | Balance: ${this.balance.toFixed(2)}`);
-    this.orders.delete(price.toFixed(2));
+    if (this.balance >= price * this.tradeSize) {
+      this.position += this.tradeSize;
+      this.balance -= price * this.tradeSize;
+      this.orders[price.toFixed(2)].executed = true;
 
-    let sellPrice = price * (1 + this.gridSize);
-    this.orders.set(sellPrice.toFixed(2), { type: "sell", executed: false });
+      let sellPrice = price * (1 + this.gridSize);
+      this.orders[sellPrice.toFixed(2)] = { type: "sell", executed: false };
+
+      console.log(`BUY at ${price.toFixed(2)} | Balance: ${this.balance.toFixed(2)}`);
+    }
   }
 
   executeSell(price) {
-    this.position -= this.tradeSize;
-    const revenue = price * this.tradeSize;
+    if (this.position >= this.tradeSize) {
+      this.position -= this.tradeSize;
+      const revenue = price * this.tradeSize;
+      const buyPrice = price / (1 + this.gridSize);
+      const tradeProfit = buyPrice * this.gridSize * this.tradeSize;
 
-    const buyPrice = price / (1 + this.gridSize);
-    const tradeProfit = buyPrice * this.gridSize * this.tradeSize;
+      this.profit += tradeProfit;
+      this.balance += revenue;
+      this.orders[price.toFixed(2)].executed = true;
 
-    this.profit += tradeProfit;
-    this.balance += revenue;
-
-    console.log(`SELL at ${price.toFixed(2)} | Profit: ${this.profit.toFixed(2)} | Balance: ${this.balance.toFixed(2)}`);
-    this.orders.delete(price.toFixed(2));
-
-    let buyPriceNew = price * (1 - this.gridSize);
-    this.orders.set(buyPriceNew.toFixed(2), { type: "buy", executed: false });
+      console.log(`SELL at ${price.toFixed(2)} | Profit: ${this.profit.toFixed(2)} | Balance: ${this.balance.toFixed(2)}`);
+    }
   }
 
   getResults() {
@@ -77,21 +78,28 @@ class GridBacktester {
   }
 }
 
-// Fetch historical price data from Binance
-async function fetchHistoricalData() {
-  const exchange = new ccxt.binance();
-  const symbol = "BTC/USDT";
-  const timeframe = "1h"; // 1-hour candles
-  const since = exchange.parse8601("2023-01-01T00:00:00Z");
-  const limit = 500; // Fetch 500 candles
+// Read CSV and extract price data
+async function readCSV(filePath) {
+  const fileStream = fs.createReadStream(filePath);
+  const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
 
-  const ohlcv = await exchange.fetchOHLCV(symbol, timeframe, since, limit);
-  return ohlcv.map(candle => candle[4]); // Extract closing prices
+  const prices = [];
+  let isFirstLine = true;
+  for await (const line of rl) {
+    if (isFirstLine) {
+      isFirstLine = false;
+      continue;
+    }
+    const columns = line.split(",");
+    const price = parseFloat(columns[1]);
+    if (!isNaN(price)) prices.push(price);
+  }
+  return prices;
 }
 
-// Run backtest with real market data
+// Run the backtest
 async function main() {
-  const priceData = await fetchHistoricalData();
+  const priceData = await readCSV("Grid_Trading_Test_Dataset.csv");
   if (priceData.length === 0) {
     console.error("Error: No price data loaded.");
     return;
