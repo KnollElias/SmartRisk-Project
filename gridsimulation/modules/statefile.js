@@ -1,7 +1,11 @@
 const fs = require("fs");
 const path = require("path");
 
-const STATE_FILE = path.join(__dirname, "statefile.json");
+const STATE_FILE = path.join(__dirname, "../statefiles/statefile.json");
+const DEFAULT_FILE = path.join(
+  __dirname,
+  "../statefiles/defaults/statefile single default.json"
+);
 
 /**
  * Reads the state from the JSON file.
@@ -38,9 +42,27 @@ function writeStateFile(newState) {
   }
 }
 
-// Example usage
-const state = readStateFile();
-if (state) {
-  state.age += 1;
-  writeStateFile(state);
+/**
+ * Loads the default statefile by copying and overwriting the current one.
+ * @returns {Promise<boolean>} True if the reset was successful, false otherwise.
+ */
+async function loadDefaultStateFile() {
+  try {
+    if (!fs.existsSync(DEFAULT_FILE)) {
+      console.error(`Default state file not found: ${DEFAULT_FILE}`);
+      return false;
+    }
+    await fs.promises.copyFile(DEFAULT_FILE, STATE_FILE);
+    console.log(`State file reset to default.`);
+    return true;
+  } catch (error) {
+    console.error("Error resetting state file:", error);
+    return false;
+  }
 }
+
+module.exports = {
+  readStateFile,
+  writeStateFile,
+  loadDefaultStateFile,
+};
