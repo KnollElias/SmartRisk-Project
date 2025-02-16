@@ -1,21 +1,89 @@
 {
-  "age": 0,
-  "initial_risk": 1,
-  "grid_gap": 1,
-  "balance": 100,
-  "real_balance": 0,
-  "current_node": 0,
-  "last_node": -1,
-  "trade_number": 0,
-  "opened_trades": 0,
-  "closed_trades": 0,
-  "nodes": [
-    {
-      "index": 1,
-      "current_risk": 1,
-      "state": 0,
-      "scale": [0, 0, 0, 0, 0, 0]
-    }
-  ],
-  "grids": []
+    "age": 0,
+    "initial_risk": 1,
+    "grid_gap": 1,
+    "balance": 100,
+    "real_balance": 0,
+    "current_node": 0,
+    "last_node": -1,
+    "trade_number": 6,
+    "opened_trades": 6,
+    "closed_trades": 0,
+    "nodes": [
+        {
+            "index": 1,
+            "current_risk": 1,
+            "state": 0,
+            "scale": [
+                0,
+                0,
+                0,
+                0,
+                0,
+                0
+            ]
+        }
+    ],
+    "grids": [
+        {
+            "node": 1,
+            "number": 1,
+            "id": "BTCUSDT1",
+            "risk": 1,
+            "state": 1,
+            "status": "scheduled",
+            "trigger": 99,
+            "takeprofit": 100
+        },
+        {
+            "node": 1,
+            "number": 2,
+            "id": "BTCUSDT2",
+            "risk": 1,
+            "state": 1,
+            "status": "scheduled",
+            "trigger": 98,
+            "takeprofit": 99
+        },
+        {
+            "node": 1,
+            "number": 3,
+            "id": "BTCUSDT3",
+            "risk": 1,
+            "state": 1,
+            "status": "scheduled",
+            "trigger": 97,
+            "takeprofit": 98
+        },
+        {
+            "node": 1,
+            "number": 4,
+            "id": "BTCUSDT4",
+            "risk": 1,
+            "state": 1,
+            "status": "scheduled",
+            "trigger": 96,
+            "takeprofit": 97
+        },
+        {
+            "node": 1,
+            "number": 5,
+            "id": "BTCUSDT5",
+            "risk": 1,
+            "state": 1,
+            "status": "scheduled",
+            "trigger": 95,
+            "takeprofit": 96
+        },
+        {
+            "node": 1,
+            "number": 6,
+            "id": "BTCUSDT6",
+            "risk": 1,
+            "state": 1,
+            "status": "scheduled",
+            "trigger": 94,
+            "takeprofit": 95
+        }
+    ]
 }

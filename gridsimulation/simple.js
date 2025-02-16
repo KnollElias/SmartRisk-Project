@@ -141,20 +141,21 @@ const isGridBellow = (price, state) => {
   }
   gridTriggers = state.grids.map((grid) => grid.trigger);
 
-  if (
-    gridTriggers.some(
-      (grid) => grid > price - 0.001 - state.grid_gap && grid < price + 0.001
-    )
-  ) {
-    return true; // there is a grid bellow
-  }
-  return false;
+  const hasGrid = gridTriggers.some(
+    (grid) =>
+      price > grid && // Ensure price is above grid level
+      price - state.grid_gap <= grid && // Ensure grid is within the range
+      (state.grids.find((g) => g.trigger === grid)?.status === "scheduled" ||
+        state.grids.find((g) => g.trigger === grid)?.status === "filled")
+  );
+
+  return hasGrid;
 };
 
 const createGridBellow = (price, state) => {
   let lowergrid =
     state.grids.length > 0
-      ? Math.max(...state.grids.map((grid) => grid.trigger))
+      ? Math.min(...state.grids.map((grid) => grid.trigger))
       : initialprice; // Find highest grid level or default to initialprice
 
   state.trade_number += 1;
@@ -165,20 +166,31 @@ const createGridBellow = (price, state) => {
   grid.risk = state.initial_risk;
   grid.state = 1;
   grid.status = "scheduled";
-  grid.trigger = lowergrid + state.grid_gap;
-  grid.takeprofit = lowergrid + state.grid_gap + state.grid_gap;
+  grid.trigger = lowergrid - state.grid_gap;
+  grid.takeprofit = lowergrid;
   state.grids.push(grid);
-  state.balance -= state.initial_risk;
   state.opened_trades += 1;
+  return state;
+};
+
+const filltriggeredGrids = (price, state) => {
+  // actiually open the trade
+  state.grids.forEach((grid) => {
+    if (price < grid.trigger && grid.status == "scheduled") {
+      grid.status = "filled";
+      state.balance -= state.initial_risk;
+    }
+  });
   return state;
 };
 
 const restartSuccessfulTrades = (price, state) => {
   state.grids.forEach((grid) => {
-    if (price > grid.takeprofit) {
+    if (price > grid.takeprofit && grid.status == "filled") {
       grid.status = "closed";
       state.balance +=
-        state.initial_risk * (grid.takeprofit / grid.trigger - 1);
+        state.initial_risk * (grid.takeprofit / grid.trigger - 1) +
+        state.initial_risk;
 
       state.closed_trades += 1;
     }
@@ -200,15 +212,14 @@ const iteration = (setPrice) => {
     state = createGridBellow(price, state);
   }
 
+  state = filltriggeredGrids(price, state);
   state = restartSuccessfulTrades(price, state);
   statefile.writeStateFile(state);
 };
 
 iteration(100);
-iteration(99.5);
-iteration(98.5);
-iteration(97.5);
-iteration(96.5);
-iteration(95.5);
-// console.log(statefile.readStateFile());
-// iteration(100);
+iteration(101);
+iteration(102);
+iteration(103);
+iteration(103);
+iteration(103);
