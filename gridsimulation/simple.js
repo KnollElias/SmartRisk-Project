@@ -217,9 +217,15 @@ const iteration = (setPrice) => {
   statefile.writeStateFile(state);
 };
 
-iteration(100);
-iteration(101);
-iteration(102);
-iteration(103);
-iteration(103);
-iteration(103);
+iteration(100); // works okay
+iteration(99.5);
+iteration(98.5);
+iteration(99.5);
+iteration(100.01);
+
+// iteration(100); // sucks
+// iteration(101);
+// iteration(102);
+// iteration(103);
+// iteration(103);
+// iteration(103);
