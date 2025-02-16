@@ -1,161 +1,204 @@
-const fs = require("fs");
-const path = require("path");
-const csv = require("csv-parser");
-const { createObjectCsvWriter } = require("csv-writer");
+//simple grid trading bot for backtests
 
-const STATE_FILE = path.join(__dirname, "statefile.json");
-const HISTORY_FILE = path.join(__dirname, "history.csv");
-const TEST_DATA_FILE = path.join(__dirname, "testdata.csv");
+///// THE GRIDGAP IS A HARDCODED ABSOLUTE PRICE LEVEL NO PERCENTAGE, IT IS THE DIFFERENCE IN THE ASSET BETWEEN THE GRIDS SO WHEN THE ASSET IS AT THE PRICE 1000 AND HTE GAP IS AT 10 THEN THE GAP IS ABOUT 1%!
+const statefile = require("./modules/statefile");
 
-const GRID_GAP_PERCENTAGE = 1 / 100; // 1% Grid Gap
-const INITIAL_BALANCE = 100;
-const INITIAL_RISK = 1;
+const initialBalance = 100;
+const initialRisk = 1;
 
-let triggeredGridsCount = 0;
-let totalGridsScheduled = 0;
-let totalGridsCompleted = 0;
+const scaleCount = 1;
+const scalePeak = 6;
 
-// CSV Writer for history file
-const csvWriter = createObjectCsvWriter({
-  path: HISTORY_FILE,
-  header: [
-    { id: "id", title: "Trade ID" },
-    { id: "trigger", title: "Trigger Price" },
-    { id: "takeprofit", title: "Take Profit Price" },
-  ],
-  append: true,
-});
+let openedTrades = 0;
+let closedTrades = 0;
 
-// Read the state file
-function readStateFile() {
-  try {
-    if (!fs.existsSync(STATE_FILE))
-      return { balance: INITIAL_BALANCE, grids: [] };
-    const data = fs.readFileSync(STATE_FILE, "utf8");
-    return JSON.parse(data);
-  } catch (error) {
-    console.error("Error reading state file:", error);
-    return { balance: INITIAL_BALANCE, grids: [] };
+/*
+l1 = 1
+l2 = 2
+l3 = 4
+l4 = 8
+l5 = 16
+l6 = 32
+
+Total: 63
+*/
+
+const asset = "BTCUSDT";
+
+/*
+grid states
+
+scheduled -> order should be placed (opened if triggered)
+trigered -> order is placed
+placed -> confirmed by the exechnge
+filled -> order is filled
+closed -> order should be added to the history, deleted form the file and a new roder shoulöd be schaduled
+
+{
+  "node": 1,            to what node scale it belongs
+  "number": 1,          the number of the trade
+  "id": "BTCUSDT1",     what asset and what number of trade it is, the second is the BTCUSDT2
+  "risk": 1,
+  "state": 1,
+  "status": "scheduled",
+  "trigger": 99,
+  "takeprofit": 100
+}
+*/
+
+let price = 100;
+let initialprice = price;
+
+function scheduleGrids() {
+  const state = statefile.readStateFile();
+  console.log(state);
+  if (state == null) {
+    console.error("State file is missing.");
+    return;
+  }
+
+  const gridCount = state.balance / state.initial_risk - state.grid_gap; // how many grids there should be but there is no trigger at 0 therefore we want to - one grid
+  let levelPrice = price; // the level price is hte level that hte grid shoul dbe triggered, that is lowered until it reaches 0
+  let tradeNumber = 0;
+  let grids = [];
+  for (let i = 0; i < gridCount; i++) {
+    let grid = {};
+    grid.node = 1;
+    tradeNumber += 1;
+    grid.number = tradeNumber;
+    grid.id = `${asset}${tradeNumber}`;
+    grid.risk = state.initial_risk;
+    grid.state = 1;
+    grid.status = "scheduled";
+    levelPrice = levelPrice - state.grid_gap;
+    grid.trigger = levelPrice;
+    grid.takeprofit = levelPrice + state.grid_gap;
+
+    grids.push(grid);
   }
 }
 
-// Write the state file
-function writeStateFile(state) {
-  try {
-    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 4), "utf8");
-  } catch (error) {
-    console.error("Error writing state file:", error);
+function generateLevels(price) {
+  const state = statefile.readStateFile();
+  if (state == null) {
+    console.error("State file is missing.");
+    return;
   }
-}
 
-// Round numbers to 2 decimal places to fix floating-point issues
-function round(value) {
-  return Math.round(value * 100) / 100;
-}
+  const gridCount = state.balance / state.initial_risk - state.grid_gap; // how many grids there should be but there is no trigger at 0 therefore we want to - one grid
+  let levelPrice = price; // the level price is hte level that hte grid shoul dbe triggered, that is lowered until it reaches 0
+  let tradeNumber = 0;
+  let levels = [];
+  for (let i = 0; i < gridCount; i++) {
+    let level = {};
+    level.state = 1;
+    levelPrice = levelPrice - state.grid_gap;
+    level.trigger = levelPrice;
+    level.takeprofit = levelPrice + state.grid_gap;
 
-// Initialize grid levels at startup based on 1% grid gaps
-function initializeGrids(initialPrice) {
-  let state = { balance: INITIAL_BALANCE, grids: [] };
-
-  let levelPrice = initialPrice;
-  while (levelPrice > 0) {
-    state.grids.push({
-      id: `GRID_${round(levelPrice)}`,
-      trigger: round(levelPrice),
-      takeprofit: round(levelPrice * (1 + GRID_GAP_PERCENTAGE)),
-      status: "scheduled",
-    });
-    levelPrice -= initialPrice * GRID_GAP_PERCENTAGE; // Move down by 1%
+    levels.push(level);
   }
-  totalGridsScheduled = state.grids.length; // Track how many grids were created
-  writeStateFile(state);
+  state.levels = levels;
+  statefile.writeStateFile(state);
+
+  // const scaleCount = state.nodes.length;
+
+  // for (let i = 0; i < scaleCount; i++) {
+  //   const node = state.nodes[i].index;
+  //   const grid = state.grids[i].node;
+  //   // const gridState = grid.state;
+  //   console.log("grid", grid, "node", node);
+
+  //   // if (gridState == "closed") {
+  //   //   grid.state = "scheduled";
+  //   //   grid.currentGrid = 1;
+  //   //   grid.currentBalance = initialBalance;
+  //   //   grid.currentRisk = initialRisk;
+  //   // }
+  // }
+
+  // if (state.gridState == "closed") {
+  //   state.gridState = "scheduled";
+  //   state.currentGrid = 1;
+  //   state.currentBalance = initialBalance;
+  //   state.currentRisk = initialRisk;
+  //   statefile.writeStateFile(state);
+  // }
 }
+// console.log(scheduleGrids(price));
 
-// Process price from historical dataset
-function processPrice(price) {
-  let state = readStateFile();
-  price = parseFloat(price); // Ensure price is a number
+const getRandomPrice = (price) => {
+  return price + Math.floor(Math.random() * 10 - 5) * 0.01;
+};
 
-  console.log(`Processing price: ${price.toFixed(2)}`);
+const getLevels = (price) => {
+  generateLevels(price);
+};
 
+const isGridBellow = (price, state) => {
+  if (state.grids == []) {
+    return false; // there are no grids bellow
+  }
+  gridTriggers = state.grids.map((grid) => grid.trigger);
+
+  if (gridTriggers.some((grid) => grid > price - 0.001 - state.grid_gap)) {
+    return true; // there is a grid bellow
+  }
+  return false;
+};
+
+const createGridBellow = (price, state) => {
+  let lowergrid =
+    state.grids.length > 0
+      ? Math.max(...state.grids.map((grid) => grid.trigger))
+      : initialprice; // Find highest grid level or default to initialprice
+
+  state.trade_number += 1;
+  let grid = {};
+  grid.node = 1;
+  grid.number = state.trade_number;
+  grid.id = `${asset}${state.trade_number}`;
+  grid.risk = state.initial_risk;
+  grid.state = 1;
+  grid.status = "scheduled";
+  grid.trigger = lowergrid + state.grid_gap;
+  grid.takeprofit = lowergrid + state.grid_gap + state.grid_gap;
+  state.grids.push(grid);
+  state.balance -= state.initial_risk;
+  state.opened_trades += 1;
+  return state;
+};
+
+const restartSucessfullTrades = (price, state) => {
   state.grids.forEach((grid) => {
-    if (grid.status === "scheduled" && price <= grid.trigger) {
-      grid.status = "filled"; // Mark as filled
-      triggeredGridsCount++; // Track triggered grids
-      console.log(`Grid ${grid.id} filled at price ${price.toFixed(2)}`);
-    }
+    if (price > grid.takeprofit) {
+      grid.status = "closed";
+      state.balance +=
+        state.initial_risk * (grid.takeprofit / grid.trigger - 1);
 
-    if (grid.status === "filled" && price >= grid.takeprofit) {
-      console.log(`Grid ${grid.id} hit take profit at ${grid.takeprofit}`);
-      moveToHistory(grid);
-      totalGridsCompleted++; // Track grids that hit take profit
-      state.grids = state.grids.filter((g) => g.id !== grid.id);
-      createGridBelow(state, grid.trigger * (1 - GRID_GAP_PERCENTAGE)); // Replace with a new grid at a lower level
+      state.closed_trades += 1;
     }
   });
+  statefile.writeStateFile(state);
+};
 
-  writeStateFile(state);
-}
+statefile.loadDefaultStateFile();
+const iteration = (setPrice) => {
+  state = statefile.readStateFile();
+  // price = getRandomPrice(price);
+  price = setPrice;
+  console.log("price", price);
 
-// Create a new grid order below the current price
-function createGridBelow(state, currentPrice) {
-  let newGrid = {
-    id: `GRID_${round(currentPrice)}`,
-    trigger: round(currentPrice),
-    takeprofit: round(currentPrice * (1 + GRID_GAP_PERCENTAGE)),
-    status: "scheduled",
-  };
-  state.grids.push(newGrid);
-  console.log("New grid created:", newGrid);
-}
+  const gridExistsBellow = isGridBellow(price, state);
+  console.log("gridExistsBellow", gridExistsBellow);
+  if (!isGridBellow) {
+    newstate = createGridBellow(price, state);
+    statefile.writeStateFile(newstate);
+  }
 
-// Move filled order to history.csv
-async function moveToHistory(grid) {
-  await csvWriter.writeRecords([
-    { id: grid.id, trigger: grid.trigger, takeprofit: grid.takeprofit },
-  ]);
-  console.log(`Trade ${grid.id} added to history.`);
-}
-
-// Read and process historical data from testdata.csv
-function startBacktest() {
-  console.log("Starting backtest using historical data...");
-
-  let priceData = [];
-
-  fs.createReadStream(TEST_DATA_FILE)
-    .pipe(csv())
-    .on("data", (row) => {
-      let price = parseFloat(row["Price"]); // Fix: Use correct column name
-      if (!isNaN(price)) {
-        priceData.push(price);
-      }
-    })
-    .on("end", () => {
-      console.log(`Loaded ${priceData.length} price points.`);
-
-      if (priceData.length === 0) {
-        console.error("No valid price data found.");
-        return;
-      }
-
-      // Initialize grids with the first price in dataset
-      initializeGrids(priceData[0]);
-
-      // Process each price in sequence
-      priceData.forEach((price) => processPrice(price));
-
-      // Summary Report
-      console.log("\n==== BACKTEST SUMMARY ====");
-      console.log(`Total price points processed: ${priceData.length}`);
-      console.log(`Total grids scheduled: ${totalGridsScheduled}`);
-      console.log(`Total grids triggered: ${triggeredGridsCount}`);
-      console.log(
-        `Total grids completed (take profit hit): ${totalGridsCompleted}`
-      );
-      console.log("Backtest complete.");
-    });
-}
-
-// Start the backtest
-startBacktest();
+  state = statefile.readStateFile();
+  restartSucessfullTrades(price, state);
+};
+iteration(100);
+iteration(99.5);
+iteration(100);

@@ -5,7 +5,7 @@ const { createObjectCsvWriter } = require("csv-writer");
 
 const STATE_FILE = path.join(__dirname, "statefile.json");
 const HISTORY_FILE = path.join(__dirname, "history.csv");
-const TEST_DATA_FILE = path.join(__dirname, "btcdata.csv");
+const TEST_DATA_FILE = path.join(__dirname, "testdata.csv");
 
 const GRID_GAP_PERCENTAGE = 1 / 100; // 1% Grid Gap
 const INITIAL_BALANCE = 100;
@@ -71,43 +71,22 @@ function initializeGrids(initialPrice) {
   writeStateFile(state);
 }
 
-// 🔥 **New Function: Expand Grid Levels Upwards**
-function expandGrids(state, currentPrice) {
-  let maxGrid = Math.max(...state.grids.map((grid) => grid.trigger)); // Find highest grid level
-
-  while (currentPrice > maxGrid) {
-    maxGrid = round(maxGrid * (1 + GRID_GAP_PERCENTAGE)); // Move up by 1%
-    let newGrid = {
-      id: `GRID_${maxGrid}`,
-      trigger: maxGrid,
-      takeprofit: round(maxGrid * (1 + GRID_GAP_PERCENTAGE)),
-      status: "scheduled",
-    };
-    state.grids.push(newGrid);
-    totalGridsScheduled++;
-    console.log(`✅ New upper grid added: ${newGrid.id}`);
-  }
-}
-
 // Process price from historical dataset
 function processPrice(price) {
   let state = readStateFile();
   price = parseFloat(price); // Ensure price is a number
 
-  console.log(`📉 Processing price: ${price.toFixed(2)}`);
-
-  // 🔼 **Check if we need to expand grids upwards**
-  expandGrids(state, price);
+  console.log(`Processing price: ${price.toFixed(2)}`);
 
   state.grids.forEach((grid) => {
     if (grid.status === "scheduled" && price <= grid.trigger) {
       grid.status = "filled"; // Mark as filled
       triggeredGridsCount++; // Track triggered grids
-      console.log(`⚡ Grid ${grid.id} filled at price ${price.toFixed(2)}`);
+      console.log(`Grid ${grid.id} filled at price ${price.toFixed(2)}`);
     }
 
     if (grid.status === "filled" && price >= grid.takeprofit) {
-      console.log(`💰 Grid ${grid.id} hit take profit at ${grid.takeprofit}`);
+      console.log(`Grid ${grid.id} hit take profit at ${grid.takeprofit}`);
       moveToHistory(grid);
       totalGridsCompleted++; // Track grids that hit take profit
       state.grids = state.grids.filter((g) => g.id !== grid.id);
@@ -127,7 +106,7 @@ function createGridBelow(state, currentPrice) {
     status: "scheduled",
   };
   state.grids.push(newGrid);
-  console.log("📉 New grid created below:", newGrid);
+  console.log("New grid created:", newGrid);
 }
 
 // Move filled order to history.csv
@@ -135,45 +114,28 @@ async function moveToHistory(grid) {
   await csvWriter.writeRecords([
     { id: grid.id, trigger: grid.trigger, takeprofit: grid.takeprofit },
   ]);
-  // console.log(`📊 Trade ${grid.id} added to history.`);
-}
-
-// Detects correct price column automatically
-function detectPriceColumn(headers) {
-  const possibleColumns = ["Price", "price"]; // Add more variations if necessary
-  return possibleColumns.find((col) => headers.includes(col)) || null;
+  console.log(`Trade ${grid.id} added to history.`);
 }
 
 // Read and process historical data from testdata.csv
 function startBacktest() {
-  console.log("🚀 Starting backtest using historical data...");
+  console.log("Starting backtest using historical data...");
 
   let priceData = [];
-  let detectedPriceColumn = null;
 
   fs.createReadStream(TEST_DATA_FILE)
     .pipe(csv())
-    .on("headers", (headers) => {
-      detectedPriceColumn = detectPriceColumn(headers);
-      if (!detectedPriceColumn) {
-        console.error(
-          "❌ ERROR: Could not detect price column. Check your CSV format."
-        );
-        process.exit(1);
-      }
-      console.log(`✅ Detected price column: ${detectedPriceColumn}`);
-    })
     .on("data", (row) => {
-      let price = parseFloat(row[detectedPriceColumn]); // Use detected column name
+      let price = parseFloat(row["Price"]); // Fix: Use correct column name
       if (!isNaN(price)) {
         priceData.push(price);
       }
     })
     .on("end", () => {
-      console.log(`📈 Loaded ${priceData.length} price points.`);
+      console.log(`Loaded ${priceData.length} price points.`);
 
       if (priceData.length === 0) {
-        console.error("❌ No valid price data found.");
+        console.error("No valid price data found.");
         return;
       }
 
@@ -184,14 +146,14 @@ function startBacktest() {
       priceData.forEach((price) => processPrice(price));
 
       // Summary Report
-      console.log("\n==== 📊 BACKTEST SUMMARY ====");
-      console.log(`🔹 Total price points processed: ${priceData.length}`);
-      console.log(`🔹 Total grids scheduled: ${totalGridsScheduled}`);
-      console.log(`🔹 Total grids triggered: ${triggeredGridsCount}`);
+      console.log("\n==== BACKTEST SUMMARY ====");
+      console.log(`Total price points processed: ${priceData.length}`);
+      console.log(`Total grids scheduled: ${totalGridsScheduled}`);
+      console.log(`Total grids triggered: ${triggeredGridsCount}`);
       console.log(
-        `🔹 Total grids completed (take profit hit): ${totalGridsCompleted}`
+        `Total grids completed (take profit hit): ${totalGridsCompleted}`
       );
-      console.log("✅ Backtest complete.");
+      console.log("Backtest complete.");
     });
 }
 
