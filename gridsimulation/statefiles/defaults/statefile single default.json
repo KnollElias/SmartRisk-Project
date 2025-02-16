@@ -1,10 +1,14 @@
 {
   "age": 0,
   "initial_risk": 1,
+  "grid_gap": 1,
   "balance": 100.0,
   "real_balance": 0.0,
   "current_node": 0,
   "last_node": -1,
+  "trade_number": 0,
+  "opened_trades": 0,
+  "closed_trades": 0,
   "nodes": [
     {
       "index": 1,
@@ -13,15 +17,5 @@
       "scale": [0, 0, 0, 0, 0, 0]
     }
   ],
-  "grids": [
-    {
-      "node": 1,
-      "id": "BTCUSDT1",
-      "number": 1,
-      "risk": 1,
-      "state": 1,
-      "status": "invalid",
-      "takeprofit": 99
-    }
-  ]
+  "grids": []
 }
