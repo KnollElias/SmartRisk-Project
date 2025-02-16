@@ -136,12 +136,16 @@ const getLevels = (price) => {
 };
 
 const isGridBellow = (price, state) => {
-  if (state.grids == []) {
+  if (state.grids.length === 0) {
     return false; // there are no grids bellow
   }
   gridTriggers = state.grids.map((grid) => grid.trigger);
 
-  if (gridTriggers.some((grid) => grid > price - 0.001 - state.grid_gap)) {
+  if (
+    gridTriggers.some(
+      (grid) => grid > price - 0.001 - state.grid_gap && grid < price + 0.001
+    )
+  ) {
     return true; // there is a grid bellow
   }
   return false;
@@ -169,7 +173,7 @@ const createGridBellow = (price, state) => {
   return state;
 };
 
-const restartSucessfullTrades = (price, state) => {
+const restartSuccessfulTrades = (price, state) => {
   state.grids.forEach((grid) => {
     if (price > grid.takeprofit) {
       grid.status = "closed";
@@ -179,26 +183,32 @@ const restartSucessfullTrades = (price, state) => {
       state.closed_trades += 1;
     }
   });
-  statefile.writeStateFile(state);
+  return state;
 };
 
-statefile.loadDefaultStateFile();
+// statefile.loadDefaultStateFile();
 const iteration = (setPrice) => {
-  state = statefile.readStateFile();
-  // price = getRandomPrice(price);
+  let state = statefile.readStateFile();
+
   price = setPrice;
   console.log("price", price);
 
   const gridExistsBellow = isGridBellow(price, state);
   console.log("gridExistsBellow", gridExistsBellow);
-  if (!isGridBellow) {
-    newstate = createGridBellow(price, state);
-    statefile.writeStateFile(newstate);
+
+  if (!gridExistsBellow) {
+    state = createGridBellow(price, state);
   }
 
-  state = statefile.readStateFile();
-  restartSucessfullTrades(price, state);
+  state = restartSuccessfulTrades(price, state);
+  statefile.writeStateFile(state);
 };
+
 iteration(100);
 iteration(99.5);
-iteration(100);
+iteration(98.5);
+iteration(97.5);
+iteration(96.5);
+iteration(95.5);
+// console.log(statefile.readStateFile());
+// iteration(100);

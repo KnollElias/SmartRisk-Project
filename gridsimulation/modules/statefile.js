@@ -18,6 +18,7 @@ function readStateFile() {
       return null;
     }
     const data = fs.readFileSync(STATE_FILE, "utf8");
+    console.log("read statefile");
     return JSON.parse(data);
   } catch (error) {
     console.error("Error reading state file:", error);
