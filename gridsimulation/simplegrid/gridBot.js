@@ -57,6 +57,7 @@ class GridBacktester {
   }
 
   executeSell(price) {
+    console.log("Execute sell start: ", this.position, this.tradeSize, "execute sell end");
     if (this.position >= this.tradeSize) {
       this.position -= this.tradeSize;
       const revenue = price * this.tradeSize;
