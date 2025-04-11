@@ -11,11 +11,11 @@ ORDER_COUNT=$(curl -s \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
   "$BASE_URL/orders?status=all" | jq '. | length')
 
-notional=10
-if [ "$ORDER_COUNT" -gt 20 ]; then
+notional=11
+if [ "$ORDER_COUNT" -gt 22 ]; then
   notional=$ORDER_COUNT
-elif [ "$ORDER_COUNT" -gt 10 ]; then
-  notional=20
+elif [ "$ORDER_COUNT" -gt 11 ]; then
+  notional=22
 fi
 
 LATEST_PRICE=$(curl -s \
@@ -39,6 +39,7 @@ BUY_RESPONSE=$(curl -s -X POST \
     "time_in_force": "gtc"
 }' "$BASE_URL/orders")
 echo "Buy response: $BUY_RESPONSE"
+BUY_QTY=$(echo "$BUY_RESPONSE" | jq -r '.filled_qty')
 
 SELL_RESPONSE=$(curl -s -X POST \
   -H "APCA-API-KEY-ID: $API_KEY" \
@@ -46,7 +47,7 @@ SELL_RESPONSE=$(curl -s -X POST \
   -H "Content-Type: application/json" \
   -d '{
     "symbol": "'"$SYMBOL"'",
-    "qty": "'"$notional"'",
+    "qty": "'"$BUY_QTY"'",
     "side": "sell",
     "type": "limit",
     "time_in_force": "gtc",
