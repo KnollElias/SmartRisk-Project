@@ -40,19 +40,13 @@ BUY_RESPONSE=$(curl -s -X POST \
 }' "$BASE_URL/orders")
 echo "Buy response: $BUY_RESPONSE"
 
-if (( $(echo "$LATEST_PRICE > 0" | bc -l) )); then
-  QUANTITY=$(awk -v notional="$notional" -v price="$LATEST_PRICE" 'BEGIN { printf "%.8f", notional/price }')
-else
-  QUANTITY=0
-fi
-
 SELL_RESPONSE=$(curl -s -X POST \
   -H "APCA-API-KEY-ID: $API_KEY" \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
   -H "Content-Type: application/json" \
   -d '{
     "symbol": "'"$SYMBOL"'",
-    "qty": "'"$QUANTITY"'",
+    "qty": "'"$notional"'",
     "side": "sell",
     "type": "limit",
     "time_in_force": "gtc",
