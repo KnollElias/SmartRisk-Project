@@ -1,20 +1,39 @@
 #!/usr/bin/env bash
 
-API_KEY="PKU4CNVLX3UAMPS4F3AN"
-API_SECRET="ZHMqQrJRkgNVpJXcvSaVA70ghFSR2fU9fnN138lm"
+API_KEY="PKHPECPSZXVITZPMZEL9"
+API_SECRET="tbj9Esc3Bk1EfTJ7iQ1l3XUW5umTjnyiwLM3GabD"
 BASE_URL="https://paper-api.alpaca.markets/v2"
 SYMBOL="BTCUSD"
 
-# Get order count and determine notional
-ORDER_COUNT=$(curl -s -H "APCA-API-KEY-ID: $API_KEY" -H "APCA-API-SECRET-KEY: $API_SECRET" "$BASE_URL/orders?status=all" | jq '. | length')
-notional=11
-if [ "$ORDER_COUNT" -gt 22 ]; then
-  notional=$ORDER_COUNT
-elif [ "$ORDER_COUNT" -gt 11 ]; then
-  notional=22
+# Define scale as a Bash array (index = trade count, value = notional)
+declare -a SCALE=(
+  0 10 10 10 10 10 10 10 10 10 10   # 1–10
+  20 20 20 20 20 20 20 20 20 20     # 11–20
+  40 40 40 40 40 40 40 40 40 40     # 21–30
+  20 20 20 20 20 20 20 20 20 20     # 31–40
+  40 40 40 40 40 40 40 40 40 40     # 41–50
+  80 80 80 80 80 80 80 80 80 80     # 51–60
+  40 40 40 40 40 40 40 40 40 40     # 61–70
+  80 80 80 80 80 80 80 80 80 80     # 71–80
+ 160 160 160 160 160 160 160 160 160 160 # 81–90
+)
+
+# Count total trades
+TRADE_NUM=$(curl -s \
+  -H "APCA-API-KEY-ID: $API_KEY" \
+  -H "APCA-API-SECRET-KEY: $API_SECRET" \
+  "$BASE_URL/orders?status=all" | jq '. | length')
+
+if [ "$TRADE_NUM" -gt 90 ]; then
+  echo "🚫 Max trade count (90) reached. Stopping."
+  exit 0
 fi
 
-# Place market buy
+notional=${SCALE[$TRADE_NUM]}
+
+echo "Trade #$TRADE_NUM – Using notional: $notional"
+
+# Place buy order
 BUY_RESPONSE=$(curl -s -X POST \
   -H "APCA-API-KEY-ID: $API_KEY" \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
@@ -30,7 +49,7 @@ BUY_RESPONSE=$(curl -s -X POST \
 ORDER_ID=$(echo "$BUY_RESPONSE" | jq -r '.id')
 echo "Buy response: $BUY_RESPONSE"
 
-# Wait for order fill
+# Wait for fill
 ATTEMPTS=10
 FILLED_QTY="0"
 FILLED_PRICE="0"
@@ -48,16 +67,13 @@ if [ "$FILLED_QTY" = "0" ] || [ "$FILLED_QTY" = "null" ]; then
   exit 1
 fi
 
-# Calculate TP and adjusted quantity
 TP_PRICE=$(awk -v price="$FILLED_PRICE" 'BEGIN { printf "%.4f", price * 1.002 }')
 ADJUSTED_QTY=$(awk -v q="$FILLED_QTY" 'BEGIN { printf "%.8f", q * 0.999 }')
 
 echo "Filled qty: $FILLED_QTY"
-echo "Avg price: $FILLED_PRICE"
-echo "Adjusted qty: $ADJUSTED_QTY"
-echo "Placing TP at: $TP_PRICE"
+echo "TP price: $TP_PRICE"
 
-# Place take profit sell order
+# Place TP sell
 SELL_RESPONSE=$(curl -s -X POST \
   -H "APCA-API-KEY-ID: $API_KEY" \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
