@@ -5,9 +5,9 @@ API_SECRET="tbj9Esc3Bk1EfTJ7iQ1l3XUW5umTjnyiwLM3GabD"
 BASE_URL="https://paper-api.alpaca.markets/v2"
 SYMBOL="BTCUSD"
 
-# Define scale as a Bash array (index = trade count, value = notional)
+# Define scale: 90 elements, 0-indexed (trade #1 = index 0)
 declare -a SCALE=(
-  0 10 10 10 10 10 10 10 10 10 10   # 1–10
+  10 10 10 10 10 10 10 10 10 10     # 1–10
   20 20 20 20 20 20 20 20 20 20     # 11–20
   40 40 40 40 40 40 40 40 40 40     # 21–30
   20 20 20 20 20 20 20 20 20 20     # 31–40
@@ -18,22 +18,24 @@ declare -a SCALE=(
  160 160 160 160 160 160 160 160 160 160 # 81–90
 )
 
-# Count total trades
+# Count only filled buy orders
 TRADE_NUM=$(curl -s \
   -H "APCA-API-KEY-ID: $API_KEY" \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
-  "$BASE_URL/orders?status=all" | jq '. | length')
+  "$BASE_URL/orders?status=closed" \
+  | jq '[.[] | select(.side == "buy" and .filled_qty != "0")] | length')
 
-if [ "$TRADE_NUM" -gt 90 ]; then
-  echo "🚫 Max trade count (90) reached. Stopping."
+INDEX=$((TRADE_NUM))  # Next trade index is current count
+
+if [ "$INDEX" -ge "${#SCALE[@]}" ]; then
+  echo "🚫 Max trade count reached ($TRADE_NUM). Stopping."
   exit 0
 fi
 
-notional=${SCALE[$TRADE_NUM]}
+notional=${SCALE[$INDEX]}
+echo "Trade #$((TRADE_NUM + 1)) – Using notional: $notional"
 
-echo "Trade #$TRADE_NUM – Using notional: $notional"
-
-# Place buy order
+# Place market buy
 BUY_RESPONSE=$(curl -s -X POST \
   -H "APCA-API-KEY-ID: $API_KEY" \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
@@ -67,13 +69,14 @@ if [ "$FILLED_QTY" = "0" ] || [ "$FILLED_QTY" = "null" ]; then
   exit 1
 fi
 
+# Calculate TP
 TP_PRICE=$(awk -v price="$FILLED_PRICE" 'BEGIN { printf "%.4f", price * 1.002 }')
 ADJUSTED_QTY=$(awk -v q="$FILLED_QTY" 'BEGIN { printf "%.8f", q * 0.999 }')
 
 echo "Filled qty: $FILLED_QTY"
 echo "TP price: $TP_PRICE"
 
-# Place TP sell
+# Place take-profit sell
 SELL_RESPONSE=$(curl -s -X POST \
   -H "APCA-API-KEY-ID: $API_KEY" \
   -H "APCA-API-SECRET-KEY: $API_SECRET" \
